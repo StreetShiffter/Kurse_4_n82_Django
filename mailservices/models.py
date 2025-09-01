@@ -1,4 +1,4 @@
-# from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -14,6 +14,10 @@ class Client(models.Model):
     comment = models.TextField(blank=True, null=True,
                                verbose_name="Комментарий",
                                help_text="Дополнительная информация о получателе")
+
+    owner = models.ForeignKey(User,
+                              on_delete=models.CASCADE,
+                              verbose_name="Владелец")
 
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,6 +38,9 @@ class Message(models.Model):
     body = models.TextField(verbose_name="Тело письма",
                             help_text="Содержание письма")
 
+    owner = models.ForeignKey(User,
+                              on_delete=models.CASCADE,
+                              verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Сообщение"
@@ -70,6 +77,10 @@ class Sending(models.Model):
         Client,
         verbose_name="Получатели"
     )
+
+    owner = models.ForeignKey(User,
+                              on_delete=models.CASCADE,
+                              verbose_name="Владелец")
 
     class Meta:
         verbose_name = "Рассылка"
