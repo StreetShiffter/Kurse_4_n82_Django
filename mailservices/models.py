@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 
 
@@ -15,7 +16,7 @@ class Client(models.Model):
                                verbose_name="Комментарий",
                                help_text="Дополнительная информация о получателе")
 
-    owner = models.ForeignKey(User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               verbose_name="Владелец")
 
@@ -38,7 +39,7 @@ class Message(models.Model):
     body = models.TextField(verbose_name="Тело письма",
                             help_text="Содержание письма")
 
-    owner = models.ForeignKey(User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               verbose_name="Владелец")
 
@@ -78,7 +79,7 @@ class Sending(models.Model):
         verbose_name="Получатели"
     )
 
-    owner = models.ForeignKey(User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               verbose_name="Владелец")
 
