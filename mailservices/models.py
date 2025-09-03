@@ -4,6 +4,7 @@ from django.db import models
 
 
 class Client(models.Model):
+    '''Получатель рассылки'''
     email = models.EmailField(unique=True,
                               verbose_name="Email получателя",
                               help_text="Уникальный адрес электронной почты получателя")
@@ -32,6 +33,7 @@ class Client(models.Model):
         return f"{self.full_name} ({self.email})"
 
 class Message(models.Model):
+    '''Сообщение для рассылки'''
     title = models.CharField(max_length=255,
                              verbose_name="Тема письма",
                              help_text="Заголовок")
@@ -51,6 +53,7 @@ class Message(models.Model):
         return self.title
 
 class Sending(models.Model):
+    '''Отправка рассылки'''
     STATUS_CHOICES = [
         ('created', 'Создана'),
         ('started', 'Запущена'),
@@ -92,6 +95,7 @@ class Sending(models.Model):
 
 
 class MailAttempt(models.Model):
+    '''Статистика попытки рассылки'''
     STATUS_CHOICES = [
         ('success', 'Успешно'),
         ('failed', 'Не успешно'),
