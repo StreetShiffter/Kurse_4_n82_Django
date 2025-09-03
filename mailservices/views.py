@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+
+from .forms import ClientForm
 from .models import Sending, Message, Client
 
 
-# Главная страница — отображение статистики
-
 def home_view(request):
+    '''Отображение статистики рассылки'''
     total_mailings = Sending.objects.filter(owner=request.user).count()
     active_mailings = Sending.objects.filter(owner=request.user, status="started").count()
     unique_recipients = Client.objects.filter(owner=request.user).values('email').distinct().count()
@@ -22,28 +23,28 @@ def home_view(request):
     return render(request, "mailservices/home.html", context)
 
 
-# Recipient CRUD
-class ClientListView(ListView):
-    model = Client
-    template_name = "mailing/recipient_list.html"
-    context_object_name = "recipients"
-
-    def get_queryset(self):
-        return Recipient.objects.filter(owner=self.request.user)
-
-
 class ClientCreateView(CreateView):
     model = Client
-    fields = ["email", "full_name", "comment"]
-    template_name = "mailing/recipient_form.html"
-    success_url = reverse_lazy("recipient_list")
+    form_class = ClientForm
+    template_name = "mailservices/client_form.html"
+    success_url = reverse_lazy("mailservices:home")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
 
-class ClienttUpdateView(UpdateView):
+
+class ClientListView(ListView):
+    model = Client
+    template_name = "mailing/client_list.html"
+    context_object_name = "recipients"
+
+    def get_queryset(self):
+        return Client.objects.filter(owner=self.request.user)
+
+
+class ClientUpdateView(UpdateView):
     model = Client
     fields = ["email", "full_name", "comment"]
     template_name = "mailing/recipient_form.html"
