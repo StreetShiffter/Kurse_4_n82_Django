@@ -13,55 +13,68 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; }
-        .navbar { background-color: #28a745; }
-        .main-content { min-height: 70vh; }
-        footer { background-color: #212529; color: #ccc; padding: 2rem 0; }
-    </style>
+    body {
+        font-family: 'Segoe UI Bold', sans-serif;
+        background-color: #F8F4FF;
+        color: #606E8C;               /* 🔹 Основной цвет текста */
+    }
+
+    /* Заголовки */
+    h1, h2, h3, h4, h5, h6 {
+        color: #212159;
+        font-weight: 700;
+    }
+
+    /* Навигация */
+    .navbar {
+        background-color:  #4B0082;
+    }
+
+    .navbar .nav-link {
+        color: white !important;
+    }
+
+    .navbar .nav-link:hover {
+        color: black !important;
+    }
+
+    .navbar .dropdown-item {
+        color: #333;
+    }
+
+    .navbar .dropdown-item:hover {
+        background-color: #44944A;
+        color: black;
+    }
+
+    /* Основное содержимое */
+    .main-content {
+        min-height: 80vh;
+    }
+
+    /* Подвал */
+    footer {
+        background-color: #212539;
+        color: #ccc;                /* Цвет текста в подвале */
+        padding: 2rem 0;
+    }
+
+    footer a {
+        color: #ddd;
+        text-decoration: none;
+    }
+
+    footer a:hover {
+        color: #fff;
+    }
+</style>
 </head>
 <body>
 
 <!-- Навигация -->
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'mailservices:home' %}">
-            <i class="fas fa-envelope me-1"></i> Рассылка
-        </a>
-
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mailservices:mailing_list' %}">Рассылки</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mailservices:message_list' %}">Сообщения</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mailservices:recipient_list' %}">Получатели</a>
-                </li>
-            </ul>
-
-            <!-- Авторизация -->
-            <div class="d-flex">
-                {% if user.is_authenticated %}
-                    <div class="dropdown">
-                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle"></i> {{ user.username }}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Профиль</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i> Выйти</a></li>
-                        </ul>
-                    </div>
-                {% else %}
-                    <a href="#" class="btn btn-outline-light btn-sm me-2">Вход</a>
-                    <a href="#" class="btn btn-light btn-sm">Регистрация</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</nav>
+{% block header %}
+{%  include 'mailservices/includes/inc_menu.html' %}
+{% endblock %}
 
 <!-- Контент -->
 <main class="main-content py-5">
@@ -73,19 +86,9 @@
 </main>
 
 <!-- Подвал -->
-<footer class="text-center text-lg-start">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start">
-                <small>&copy; 2025 <strong>Рассылка</strong>. Управление email-кампаниями.</small>
-            </div>
-            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <a href="#" class="text-muted me-3">Помощь</a>
-                <a href="#" class="text-muted">API</a>
-            </div>
-        </div>
-    </div>
-</footer>
+{% block footer %}
+{%  include 'mailservices/includes/inc_footer.html' %}
+{% endblock %}
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
