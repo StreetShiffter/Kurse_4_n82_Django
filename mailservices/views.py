@@ -24,6 +24,7 @@ def home_view(request):
 
 
 class ClientCreateView(CreateView):
+    """Создание записи о клиенте"""
     model = Client
     form_class = ClientForm
     template_name = "mailservices/client_form.html"
@@ -33,13 +34,27 @@ class ClientCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
+
 class ClientDetailView(DetailView):
+    """Просмотр записи о клиенте"""
     model = Client
     context_object_name = "client"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class ClientUpdateView(UpdateView):
+    """Редактирование записи клиента"""
+    model = Client
+    form_class = ClientForm
+    template_name = "mailservices/client_form.html"
+    success_url = reverse_lazy("mailservices:home")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 class ClientListView(ListView):
     model = Client
@@ -49,12 +64,6 @@ class ClientListView(ListView):
     def get_queryset(self):
         return Client.objects.filter(owner=self.request.user)
 
-
-class ClientUpdateView(UpdateView):
-    model = Client
-    fields = ["email", "full_name", "comment"]
-    template_name = "mailing/recipient_form.html"
-    success_url = reverse_lazy("recipient_list")
 
 
 class ClientDeleteView(DeleteView):
