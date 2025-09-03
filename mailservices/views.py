@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
 from .forms import ClientForm
@@ -33,7 +33,13 @@ class ClientCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
+class ClientDetailView(DetailView):
+    model = Client
+    context_object_name = "client"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 class ClientListView(ListView):
     model = Client
