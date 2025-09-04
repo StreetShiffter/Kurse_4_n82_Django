@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
-from mailservices.models import Client
+from mailservices.models import Client, Message
 from mailservices.utils import CENSORED_WORDS
 
 
@@ -70,5 +70,44 @@ class ClientForm(forms.ModelForm):
         return comment
 
 
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['title',
+                  'body',
+                  ]
 
+    def __init__(self, *args, **kwargs):
+        super(MessageForm, self).__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Тема письма'})
+
+        self.fields['body'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Тело письма'})
+
+    def clean_title(self):
+        """Валидатор корректности названия письма"""
+        title = self.cleaned_data.get('title', '')
+        if not title.strip():
+            return title
+
+        lower_title = title.lower()
+        for word in CENSORED_WORDS:
+            if word in lower_title:
+                raise ValidationError(f'Использовано запрещённое слово: "{word}"')
+        return title
+
+    def clean_body(self):
+        """Валидатор корректности наполнения письма"""
+        body = self.cleaned_data.get('body', '')
+        if not body.strip():
+            return body
+
+        lower_body = body.lower()
+        for word in CENSORED_WORDS:
+            if word in lower_body:
+                raise ValidationError(f'Использовано запрещённое слово: "{word}"')
+        return body
 

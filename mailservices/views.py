@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
-from .forms import ClientForm
+from .forms import ClientForm, MessageForm
 from .models import Sending, Message, Client
 
 
@@ -22,13 +22,13 @@ def home_view(request):
     }
     return render(request, "mailservices/home.html", context)
 
-
+##########################################################################################
 class ClientCreateView(CreateView):
     """Создание записи о клиенте"""
     model = Client
     form_class = ClientForm
     template_name = "mailservices/client_form.html"
-    success_url = reverse_lazy("mailservices:home")
+    success_url = reverse_lazy("mailservices:client_list")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -50,7 +50,7 @@ class ClientUpdateView(UpdateView):
     model = Client
     form_class = ClientForm
     template_name = "mailservices/client_form.html"
-    success_url = reverse_lazy("mailservices:home")
+    success_url = reverse_lazy("mailservices:client_list")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -58,40 +58,42 @@ class ClientUpdateView(UpdateView):
 
 class ClientListView(ListView):
     model = Client
-    template_name = "mailing/client_list.html"
-    context_object_name = "recipients"
+    template_name = "mailservices/client_list.html"
+    context_object_name = "clients"
 
     def get_queryset(self):
         return Client.objects.filter(owner=self.request.user)
 
 
-
 class ClientDeleteView(DeleteView):
     model = Client
-    template_name = "mailing/recipient_confirm_delete.html"
-    success_url = reverse_lazy("recipient_list")
+    template_name = "mailservices/client_confirm_delete.html"
+    success_url = reverse_lazy('mailservices:client_list')
 
+#################################################################################
 
 
 # Message CRUD
+
+class MessageCreateView(CreateView):
+    model = Message
+    form_class = MessageForm
+    template_name = "mailservices/message_form.html"
+    success_url = reverse_lazy("mailservices:message_list")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
 class MessageListView(ListView):
     model = Message
-    template_name = "mailing/message_list.html"
+    template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
     def get_queryset(self):
         return Message.objects.filter(owner=self.request.user)
 
 
-class MessageCreateView(CreateView):
-    model = Message
-    fields = ["mail_title", "mail_body"]
-    template_name = "mailing/message_form.html"
-    success_url = reverse_lazy("message_list")
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
 
 
 class MessageUpdateView(UpdateView):
@@ -154,3 +156,4 @@ class SendingDeleteView(DeleteView):
     model = Sending
     template_name = "mailing/mailing_confirm_delete.html"
     success_url = reverse_lazy("mailing_list")
+
