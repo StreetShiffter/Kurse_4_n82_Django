@@ -11,14 +11,14 @@ from .models import Sending, Message, Client
 
 def home_view(request):
     '''Отображение статистики рассылки'''
-    total_mailings = Sending.objects.filter(owner=request.user).count()
-    active_mailings = Sending.objects.filter(owner=request.user, status="started").count()
-    unique_recipients = Client.objects.filter(owner=request.user).values('email').distinct().count()
+    total_sendings = Sending.objects.filter(owner=request.user).count()
+    active_sendings = Sending.objects.filter(owner=request.user, status="started").count()
+    unique_clients = Client.objects.filter(owner=request.user).values('email').distinct().count()
 
     context = {
-        "total_mailings": total_mailings,
-        "active_mailings": active_mailings,
-        "unique_recipients": unique_recipients,
+        "total_sendings": total_sendings,
+        "active_sendings": active_sendings,
+        "unique_clients": unique_clients,
     }
     return render(request, "mailservices/home.html", context)
 
@@ -57,6 +57,7 @@ class ClientUpdateView(UpdateView):
         return super().form_valid(form)
 
 class ClientListView(ListView):
+    """Просмотр всех записей клиентов"""
     model = Client
     template_name = "mailservices/client_list.html"
     context_object_name = "clients"
@@ -65,6 +66,7 @@ class ClientListView(ListView):
         return Client.objects.filter(owner=self.request.user)
 
 class ClientDeleteView(DeleteView):
+    """Удаление записи клиента"""
     model = Client
     template_name = "mailservices/client_confirm_delete.html"
     success_url = reverse_lazy('mailservices:client_list')
@@ -93,31 +95,33 @@ class MessageListView(ListView):
         return Message.objects.filter(owner=self.request.user)
 
 class MessageUpdateView(UpdateView):
+    """Редактирование сообщения для рассылки"""
     model = Message
     form_class = MessageForm
     template_name = "mailservices/message_form.html"
     success_url = reverse_lazy("mailservices:message_list")
 
 class MessageDeleteView(DeleteView):
+    """Удаление сообщения для рассылки"""
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
     success_url = reverse_lazy("mailservices:message_list")
 
-class ClientDetailView(DetailView):
-    """Просмотр записи о клиенте"""
-    model = Client
-    context_object_name = "client"
+class MessageDetailView(DetailView):
+    """Просмотр сообщения для рассылки"""
+    model = Message
+    context_object_name = "message"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
-
+################################################################################################
 
 # Mailing CRUD
 class SendingListView(ListView):
+    """Просмотр списка рассылок"""
     model = Sending
-    template_name = "mailing/mailing_list.html"
+    template_name = "mailservices/sending_list.html"
     context_object_name = "mailings"
 
     def get_queryset(self):

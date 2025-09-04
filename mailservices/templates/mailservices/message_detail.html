@@ -1,0 +1,15 @@
+{% extends "mailservices/base.html" %}
+{% block title %}Информация сообщения для рассылки{% endblock %}
+{%  include 'mailservices/includes/inc_menu.html' %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 500px;">
+    <div class="card-body text-center">
+        <h4 class="card-title">Сообщение</h4>
+        <p class="card-text"><strong>Заголовок письма:</strong> {{ message.title }}</p>
+        <p class="card-text"><strong>Тема письма:</strong> {{ message.body }}</p>
+        <p class="card-text"><strong>Автор:</strong> {{ message.owner }}</p>
+        <a href="{% url 'mailservices:message_list' %}" class="btn btn-outline-secondary">Назад к списку</a>
+    </div>
+</div>
+{% endblock %}
