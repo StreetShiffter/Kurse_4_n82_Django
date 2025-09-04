@@ -15,7 +15,7 @@ urlpatterns = [
     ######################
     path("messages/create/", views.MessageCreateView.as_view(), name="message_create"),
     path("messages/", views.MessageListView.as_view(), name="message_list"),
-    # ... другие закомментированные пути
+    path("messages/<int:pk>/edit/", views.MessageUpdateView.as_view(), name="message_edit")
 ]
 
 # urlpatterns = [
