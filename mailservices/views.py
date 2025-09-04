@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
-from .forms import ClientForm, MessageForm
+from .forms import ClientForm, MessageForm, SendingForm
 from .models import Sending, Message, Client
 
 
@@ -117,7 +117,7 @@ class MessageDetailView(DetailView):
         return context
 ################################################################################################
 
-# Mailing CRUD
+# Sending CRUD
 class SendingListView(ListView):
     """Просмотр списка рассылок"""
     model = Sending
@@ -129,10 +129,16 @@ class SendingListView(ListView):
 
 
 class SendingCreateView(CreateView):
+    """Создание новой рассылки"""
     model = Sending
-    fields = ["start_datetime", "end_datetime", "message", "recipients"]
-    template_name = "mailing/mailing_form.html"
-    success_url = reverse_lazy("mailing_list")
+    form_class = SendingForm
+    template_name = "mailservices/sending_form.html"
+    success_url = reverse_lazy('mailservices:sending_list')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -140,10 +146,6 @@ class SendingCreateView(CreateView):
         form.fields["message"].queryset = Message.objects.filter(owner=self.request.user)
         form.fields["recipients"].queryset = Client.objects.filter(owner=self.request.user)
         return form
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
 
 
 class SendingUpdateView(UpdateView):
@@ -161,6 +163,7 @@ class SendingUpdateView(UpdateView):
 
 
 class SendingDeleteView(DeleteView):
+    """Удаление конкретной рассылки"""
     model = Sending
     template_name = "mailservices/sending_confirm_delete.html"
     success_url = reverse_lazy('mailservices:sending_list')

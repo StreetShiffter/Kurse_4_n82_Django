@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
-from mailservices.models import Client, Message
+from mailservices.models import Client, Message, Sending
 from mailservices.utils import CENSORED_WORDS
 
 
@@ -110,4 +110,35 @@ class MessageForm(forms.ModelForm):
             if word in lower_body:
                 raise ValidationError(f'Использовано запрещённое слово: "{word}"')
         return body
+
+class SendingForm(forms.ModelForm):
+    class Meta:
+        model = Sending
+        fields = ['start_datetime',
+                  'end_datetime',
+                  'message',
+                  'recipients'
+                  ]
+        widgets = {
+            'start_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+            'end_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),}
+
+    def __init__(self, *args, **kwargs):
+        super(SendingForm, self).__init__(*args, **kwargs)
+        self.fields['start_datetime'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Начало рассылки'})
+
+        self.fields['end_datetime'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Конец рассылки'})
+
+        self.fields['message'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Сообщение для рассылки'})
+
+        self.fields['recipients'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Получатели рассылки (для добавления нескольких удерживайте CTRL)'})
+
 

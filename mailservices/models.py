@@ -1,6 +1,9 @@
 # from django.contrib.auth.models import User
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class Client(models.Model):
@@ -79,7 +82,7 @@ class Sending(models.Model):
     )
     recipients = models.ManyToManyField(
         Client,
-        verbose_name="Получатели"
+        verbose_name="Получатели рассылки (для добавления нескольких удерживайте CTRL)"
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -90,8 +93,28 @@ class Sending(models.Model):
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
 
+    def clean(self):
+        super().clean()
+
+        if self.start_datetime and self.end_datetime:
+            if self.start_datetime >= self.end_datetime:
+                raise ValidationError({
+                    'end_datetime': 'Дата окончания должна быть позже даты начала.'
+                })
+
+            if self.start_datetime < timezone.now():
+                raise ValidationError({
+                    'start_datetime': 'Дата начала не может быть в прошлом.'
+                })
+
+            if (self.end_datetime - self.start_datetime).days > 365:
+                raise ValidationError({
+                    'end_datetime': 'Рассылка не может длиться больше года.'
+                })
+
     def __str__(self):
         return f"Рассылка {self.start_datetime} — {self.status}"
+
 
 
 class MailAttempt(models.Model):
