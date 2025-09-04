@@ -23,6 +23,8 @@ def home_view(request):
     return render(request, "mailservices/home.html", context)
 
 ##########################################################################################
+
+# Client CRUD
 class ClientCreateView(CreateView):
     """Создание записи о клиенте"""
     model = Client
@@ -34,7 +36,6 @@ class ClientCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-
 class ClientDetailView(DetailView):
     """Просмотр записи о клиенте"""
     model = Client
@@ -43,7 +44,6 @@ class ClientDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
 
 class ClientUpdateView(UpdateView):
     """Редактирование записи клиента"""
@@ -64,7 +64,6 @@ class ClientListView(ListView):
     def get_queryset(self):
         return Client.objects.filter(owner=self.request.user)
 
-
 class ClientDeleteView(DeleteView):
     model = Client
     template_name = "mailservices/client_confirm_delete.html"
@@ -72,9 +71,7 @@ class ClientDeleteView(DeleteView):
 
 #################################################################################
 
-
 # Message CRUD
-
 class MessageCreateView(CreateView):
     """Создание сообщения"""
     model = Message
@@ -95,18 +92,25 @@ class MessageListView(ListView):
     def get_queryset(self):
         return Message.objects.filter(owner=self.request.user)
 
-
 class MessageUpdateView(UpdateView):
     model = Message
     form_class = MessageForm
     template_name = "mailservices/message_form.html"
     success_url = reverse_lazy("mailservices:message_list")
 
-
 class MessageDeleteView(DeleteView):
     model = Message
-    template_name = "mailing/message_confirm_delete.html"
-    success_url = reverse_lazy("message_list")
+    template_name = "mailservices/message_confirm_delete.html"
+    success_url = reverse_lazy("mailservices:message_list")
+
+class ClientDetailView(DetailView):
+    """Просмотр записи о клиенте"""
+    model = Client
+    context_object_name = "client"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 
