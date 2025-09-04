@@ -1,0 +1,25 @@
+{% extends "mailservices/base.html" %}
+{% block title %}Информация рассылки{% endblock %}
+{%  include 'mailservices/includes/inc_menu.html' %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 500px;">
+    <div class="card-body text-center">
+        <h4 class="card-title ">Рассылка</h4>
+        <p class="card-text"><strong>Дата начала рассылки:</strong> {{ sending.start_datetime }}</p>
+        <p class="card-text"><strong>Дата конца рассылки:</strong> {{ sending.end_datetime }}</p>
+        <p class="card-text"><strong>Название рассылки:</strong> {{ sending.message }}</p>
+    <p class="card-text"><strong>Сообщение рассылки:</strong> {{ message.body }}</p>
+        <p class="card-text"><strong>Получатель(ли) рассылки:</strong> 
+            {% if sending.recipients.all %}
+              {% for client in sending.recipients.all %}
+                {{ client.full_name }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}</p>
+        <p class="card-text"><strong>Статус рассылки:</strong> {{ sending.get_status_display}}</p>
+        <a href="{% url 'mailservices:sending_list' %}" class="btn btn-outline-secondary">Назад к списку</a>
+    </div>
+</div>
+{% endblock %}

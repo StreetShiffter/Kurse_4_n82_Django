@@ -127,7 +127,6 @@ class SendingListView(ListView):
     def get_queryset(self):
         return Sending.objects.filter(owner=self.request.user).select_related("message")
 
-
 class SendingCreateView(CreateView):
     """Создание новой рассылки"""
     model = Sending
@@ -146,6 +145,16 @@ class SendingCreateView(CreateView):
         form.fields["message"].queryset = Message.objects.filter(owner=self.request.user)
         form.fields["recipients"].queryset = Client.objects.filter(owner=self.request.user)
         return form
+
+class SendingDetailView(DetailView):
+    """Просмотр информации рассылки"""
+    model = Sending
+    context_object_name = "sending"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['message'] = self.object.message
+        return context
 
 
 class SendingUpdateView(UpdateView):
