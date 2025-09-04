@@ -158,10 +158,11 @@ class SendingDetailView(DetailView):
 
 
 class SendingUpdateView(UpdateView):
-    model = Client
-    fields = ["start_datetime", "end_datetime", "message", "recipients"]
-    template_name = "mailing/mailing_form.html"
-    success_url = reverse_lazy("mailing_list")
+    """Обновление информации рассылки"""
+    model = Sending
+    form_class = SendingForm
+    template_name = "mailservices/sending_form.html"
+    success_url = reverse_lazy('mailservices:sending_list')
 
 
     def get_form(self, form_class=None):
