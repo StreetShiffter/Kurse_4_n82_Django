@@ -1,12 +1,16 @@
-
-from django.shortcuts import render
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
 from .forms import ClientForm, MessageForm, SendingForm
-from .models import Sending, Message, Client
+from .models import Sending, Message, Client, MailAttempt
+from .services import send_mailing
 
 
 def home_view(request):
@@ -125,7 +129,20 @@ class SendingListView(ListView):
     context_object_name = "mailings"
 
     def get_queryset(self):
+        # находим запись и если она есть  по времени завершения — автоматически завершаем просроченные рассылки
+        now = timezone.now()
+        Sending.objects.filter(
+            owner=self.request.user,
+            status='started',
+            end_datetime__lt=now
+        ).update(status='completed')
+
         return Sending.objects.filter(owner=self.request.user).select_related("message")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['now'] = timezone.now()
+        return context
 
 class SendingCreateView(CreateView):
     """Создание новой рассылки"""
@@ -149,7 +166,7 @@ class SendingCreateView(CreateView):
 class SendingDetailView(DetailView):
     """Просмотр информации рассылки"""
     model = Sending
-    context_object_name = "sending"
+    # context_object_name = "sending"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -177,4 +194,56 @@ class SendingDeleteView(DeleteView):
     model = Sending
     template_name = "mailservices/sending_confirm_delete.html"
     success_url = reverse_lazy('mailservices:sending_list')
+
+class SendingNowView(View):
+    """
+    Вьюха для ручной отправки рассылки по кнопке.
+    Доступна только владельцу.
+    """
+
+    def post(self, request, pk):
+        sending = get_object_or_404(Sending, pk=pk)
+
+        # Проверка владельца
+        if sending.owner != request.user:
+            messages.error(request, "Вы не можете отправить чужую рассылку.")
+            return redirect('mailservices:sending_list')
+
+        # Запускаем отправку
+        send_mailing(sending)
+
+        messages.success(request, f"Рассылка '{sending}' была обработана.")
+        return redirect('mailservices:sending_list')
+#################################################################################################
+
+class AttemptListView( ListView):
+    model = MailAttempt
+    template_name = 'mailservices/attempt_list.html'
+    context_object_name = 'attempts'
+    paginate_by = 10
+
+    def test_func(self):
+        """Разрешаем: админ, модератор, владелец"""
+        user = self.request.user
+        return user.is_superuser or hasattr(user, 'is_moderator') and user.is_moderator or user.is_authenticated
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_superuser:
+            return MailAttempt.objects.all().select_related('mailing', 'mailing__owner')
+
+        if hasattr(user, 'is_moderator') and user.is_moderator:
+            return MailAttempt.objects.all().select_related('mailing', 'mailing__owner')
+
+        # Обычный пользователь — только свои попытки
+        return MailAttempt.objects.filter(mailing__owner=user).select_related('mailing')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'История отправки писем'
+        return context
+
+
+
 

@@ -1,6 +1,9 @@
+
+
+<!-- mailservices/sending_list.html -->
 {% extends "mailservices/base.html" %}
 
-{% block title %}Список gbctv{% endblock %}
+{% block title %}Список рассылок{% endblock %}
 
 {% block content %}
 <h2>Список рассылок</h2>
@@ -9,21 +12,22 @@
   <table class="table table-striped table-hover">
     <thead class="table-light">
       <tr>
-          <th>Дата и время начала отправки</th>
-          <th>Дата и время конца отправки</th>
-          <th>Статус рассылки</th>
-          <th>Сообщение для рассылки</th>
-          <th>Пользователи для рассылки</th>
+        <th>Дата начала</th>
+        <th>Дата окончания</th>
+        <th>Статус</th>
+        <th>Сообщение</th>
+        <th>Получатели</th>
+        <th>Действия</th>
       </tr>
     </thead>
     <tbody>
       {% for sending in object_list %}
         <tr>
-            <td>{{ sending.start_datetime }}</td>
-            <td>{{ sending.end_datetime }}</td>
-            <td>{{ sending.get_status_display }}</td>
-            <td>{{ sending.message }}</td>
-            <td>
+          <td>{{ sending.start_datetime }}</td>
+          <td>{{ sending.end_datetime }}</td>
+          <td>{{ sending.get_status_display }}</td>
+          <td>{{ sending.message }}</td>
+          <td>
             {% if sending.recipients.all %}
               {% for client in sending.recipients.all %}
                 {{ client.full_name }}{% if not forloop.last %}, {% endif %}
@@ -31,7 +35,24 @@
             {% else %}
               <span class="text-muted">—</span>
             {% endif %}
+          </td>
           <td>
+            {% if sending.status != 'completed' and sending.end_datetime > now %}
+              <form method="post" action="{% url 'mailservices:send_mailing_now' sending.pk %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger"
+                        onclick="return confirm('Отправить эту рассылку немедленно?')">
+                  Отправить сейчас
+                </button>
+              </form>
+            {% else %}
+              {% if sending.status == 'completed' %}
+                <span class="text-success">Завершена</span>
+              {% else %}
+                <span class="text-muted">Время истекло</span>
+              {% endif %}
+            {% endif %}
+
             <a href="{% url 'mailservices:sending_detail' sending.pk %}">Просмотр</a>
             <a href="{% url 'mailservices:sending_edit' sending.pk %}">Изменить</a>
             <a href="{% url 'mailservices:sending_delete' sending.pk %}">Удалить</a>

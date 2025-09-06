@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.utils import timezone
 
 from mailservices.models import Client, Message, Sending
 from mailservices.utils import CENSORED_WORDS
@@ -140,5 +141,19 @@ class SendingForm(forms.ModelForm):
         self.fields['recipients'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Получатели рассылки (для добавления нескольких удерживайте CTRL)'})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start_datetime")
+        end = cleaned_data.get("end_datetime")
+
+        if start and not timezone.is_aware(start):
+            # Приводим к timezone-aware (UTC)
+            cleaned_data["start_datetime"] = timezone.make_aware(start, timezone.get_current_timezone())
+
+        if end and not timezone.is_aware(end):
+            cleaned_data["end_datetime"] = timezone.make_aware(end, timezone.get_current_timezone())
+
+        return cleaned_data
 
 
