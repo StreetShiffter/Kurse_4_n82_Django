@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -13,18 +14,6 @@ from .models import Sending, Message, Client, MailAttempt
 from .services import send_mailing
 
 
-# def home_view(request):
-#     '''Отображение статистики рассылки'''
-#     total_sendings = Sending.objects.filter(owner=request.user).count()
-#     active_sendings = Sending.objects.filter(owner=request.user, status="started").count()
-#     unique_clients = Client.objects.filter(owner=request.user).values('email').distinct().count()
-#
-#     context = {
-#         "total_sendings": total_sendings,
-#         "active_sendings": active_sendings,
-#         "unique_clients": unique_clients,
-#     }
-#     return render(request, "mailservices/home.html", context)
 def home_view(request):
     # Общая статистика (видна всем)
     total_sendings = Sending.objects.count()
@@ -59,7 +48,7 @@ def home_view(request):
 ##########################################################################################
 
 # Client CRUD
-class ClientCreateView(CreateView):
+class ClientCreateView(LoginRequiredMixin, CreateView):
     """Создание записи о клиенте"""
     model = Client
     form_class = ClientForm
@@ -70,7 +59,7 @@ class ClientCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-class ClientDetailView(DetailView):
+class ClientDetailView(LoginRequiredMixin, DetailView):
     """Просмотр записи о клиенте"""
     model = Client
     context_object_name = "client"
@@ -79,7 +68,7 @@ class ClientDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         return context
 
-class ClientUpdateView(UpdateView):
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование записи клиента"""
     model = Client
     form_class = ClientForm
@@ -90,16 +79,18 @@ class ClientUpdateView(UpdateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-class ClientListView(ListView):
+class ClientListView(LoginRequiredMixin, ListView):
     """Просмотр всех записей клиентов"""
     model = Client
     template_name = "mailservices/client_list.html"
     context_object_name = "clients"
 
     def get_queryset(self):
-        return Client.objects.filter(owner=self.request.user)
+        if self.request.user.is_superuser:
+            return Client.objects.all()  # Админ видит всех
+        return Client.objects.filter(owner=self.request.user)  # Обычный пользователь — только свои
 
-class ClientDeleteView(DeleteView):
+class ClientDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление записи клиента"""
     model = Client
     template_name = "mailservices/client_confirm_delete.html"
@@ -108,7 +99,7 @@ class ClientDeleteView(DeleteView):
 #################################################################################
 
 # Message CRUD
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     """Создание сообщения"""
     model = Message
     form_class = MessageForm
@@ -119,29 +110,33 @@ class MessageCreateView(CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     """Просмотр всех сообщений"""
     model = Message
     template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
+    # def get_queryset(self):
+    #     #     return Message.objects.filter(owner=self.request.user)
     def get_queryset(self):
-        return Message.objects.filter(owner=self.request.user)
+        if self.request.user.is_superuser:
+            return Message.objects.all()  # Админ видит всех
+        return Message.objects.filter(owner=self.request.user)  # Обычный пользователь — только свои
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование сообщения для рассылки"""
     model = Message
     form_class = MessageForm
     template_name = "mailservices/message_form.html"
     success_url = reverse_lazy("mailservices:message_list")
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление сообщения для рассылки"""
     model = Message
     template_name = "mailservices/message_confirm_delete.html"
     success_url = reverse_lazy("mailservices:message_list")
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, DetailView):
     """Просмотр сообщения для рассылки"""
     model = Message
     context_object_name = "message"
@@ -152,7 +147,7 @@ class MessageDetailView(DetailView):
 ################################################################################################
 
 # Sending CRUD
-class SendingListView(ListView):
+class SendingListView(LoginRequiredMixin, ListView):
     """Просмотр списка рассылок"""
     model = Sending
     template_name = "mailservices/sending_list.html"
@@ -174,7 +169,7 @@ class SendingListView(ListView):
         context['now'] = timezone.now()
         return context
 
-class SendingCreateView(CreateView):
+class SendingCreateView(LoginRequiredMixin, CreateView):
     """Создание новой рассылки"""
     model = Sending
     form_class = SendingForm
@@ -193,7 +188,7 @@ class SendingCreateView(CreateView):
         form.fields["recipients"].queryset = Client.objects.filter(owner=self.request.user)
         return form
 
-class SendingDetailView(DetailView):
+class SendingDetailView(LoginRequiredMixin, DetailView):
     """Просмотр информации рассылки"""
     model = Sending
     # context_object_name = "sending"
@@ -204,7 +199,7 @@ class SendingDetailView(DetailView):
         return context
 
 
-class SendingUpdateView(UpdateView):
+class SendingUpdateView(LoginRequiredMixin, UpdateView):
     """Обновление информации рассылки"""
     model = Sending
     form_class = SendingForm
@@ -219,7 +214,7 @@ class SendingUpdateView(UpdateView):
         return form
 
 
-class SendingDeleteView(DeleteView):
+class SendingDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление конкретной рассылки"""
     model = Sending
     template_name = "mailservices/sending_confirm_delete.html"
@@ -246,7 +241,7 @@ class SendingNowView(View):
         return redirect('mailservices:sending_list')
 #################################################################################################
 
-class AttemptListView( ListView):
+class AttemptListView(LoginRequiredMixin, ListView):
     model = MailAttempt
     template_name = 'mailservices/attempt_list.html'
     context_object_name = 'attempts'

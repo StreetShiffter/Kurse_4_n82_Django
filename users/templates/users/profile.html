@@ -13,6 +13,7 @@
         <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
 
         <a href="{% url 'users:profile_edit' %}" class="btn btn-warning">Редактировать</a>
+        <a href="{% url 'mailservices:attempt_list' %}" class="btn btn-info">Статистика рассылок</a>
     </div>
 </div>
 
