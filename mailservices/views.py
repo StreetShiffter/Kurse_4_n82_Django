@@ -13,18 +13,48 @@ from .models import Sending, Message, Client, MailAttempt
 from .services import send_mailing
 
 
+# def home_view(request):
+#     '''Отображение статистики рассылки'''
+#     total_sendings = Sending.objects.filter(owner=request.user).count()
+#     active_sendings = Sending.objects.filter(owner=request.user, status="started").count()
+#     unique_clients = Client.objects.filter(owner=request.user).values('email').distinct().count()
+#
+#     context = {
+#         "total_sendings": total_sendings,
+#         "active_sendings": active_sendings,
+#         "unique_clients": unique_clients,
+#     }
+#     return render(request, "mailservices/home.html", context)
 def home_view(request):
-    '''Отображение статистики рассылки'''
-    total_sendings = Sending.objects.filter(owner=request.user).count()
-    active_sendings = Sending.objects.filter(owner=request.user, status="started").count()
-    unique_clients = Client.objects.filter(owner=request.user).values('email').distinct().count()
+    # Общая статистика (видна всем)
+    total_sendings = Sending.objects.count()
+    unique_clients = Client.objects.count()
+
+    # Активные рассылки: started или created (тоже общая или по владельцу)
+    active_sendings = Sending.objects.filter(
+        status__in=['created', 'started']
+    ).count()
+
+    # Если пользователь авторизован — показываем его статистику
+    if request.user.is_authenticated:
+        my_total = Sending.objects.filter(owner=request.user).count()
+        my_active = Sending.objects.filter(
+            owner=request.user,
+            status__in=['created', 'started']
+        ).count()
+    else:
+        my_total = 0
+        my_active = 0
 
     context = {
-        "total_sendings": total_sendings,
-        "active_sendings": active_sendings,
-        "unique_clients": unique_clients,
+        'total_sendings': total_sendings,
+        'active_sendings': active_sendings,
+        'unique_clients': unique_clients,
+        # Опционально: свои показатели
+        'my_total': my_total,
+        'my_active': my_active,
     }
-    return render(request, "mailservices/home.html", context)
+    return render(request, 'mailservices/home.html', context)
 
 ##########################################################################################
 

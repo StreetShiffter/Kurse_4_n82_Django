@@ -1,0 +1,19 @@
+{% extends "mailservices/base.html" %}
+{% block title %}Главная{% endblock %}
+{%  include 'mailservices/includes/inc_menu.html' %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body text-center">  <!-- text-center для центрирования -->
+        <h3>Профиль пользователя {{ user.username }}</h3>
+        <p><strong>Почта:</strong> {{ user.email }}</p>
+
+        <p><strong>Никнейм:</strong> {{ user.username }}</p>
+        <p><strong>Номер телефона:</strong> {{ user.phone }}</p>
+
+        <a href="{% url 'users:profile_edit' %}" class="btn btn-warning">Редактировать</a>
+    </div>
+</div>
+
+{% endblock %}

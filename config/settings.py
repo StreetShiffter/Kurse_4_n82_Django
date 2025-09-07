@@ -161,10 +161,10 @@ LOGGING = {
     },
 }
 #
-# LOGIN_REDIRECT_URL = 'users:profile'# Редирект после логирования(имя приложения и имя в url)
-# LOGOUT_REDIRECT_URL = 'mailservices:home'# Редирект после выхода(имя приложения и имя в url )
-# LOGIN_URL = 'users:register'# Редирект на страницу регистрации, если вьюшка защищена миксином LoginRequiredMixin
-#
+LOGIN_REDIRECT_URL = 'users:profile'# Редирект после логирования(имя приложения и имя в url)
+LOGOUT_REDIRECT_URL = 'mailservices:home'# Редирект после выхода(имя приложения и имя в url )
+LOGIN_URL = 'users:register'# Редирект на страницу регистрации, если вьюшка защищена миксином LoginRequiredMixin
+
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
