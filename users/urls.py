@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth.views import LogoutView
 from django.urls import path
 from users.apps import UsersConfig
 from .views import (CustomLoginView,
@@ -8,6 +7,15 @@ from .views import (CustomLoginView,
                     UserProfileView,
                     UserProfileEditView,
                     email_verification)
+
+from django.contrib.auth.views import (
+    LogoutView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+)
+
 
 app_name = UsersConfig.name
 
@@ -18,6 +26,36 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name="login"),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('email-confirm/<str:token>/', email_verification, name="email-confirm"),
+    # Логика сброса пароля
+
+    path(
+        "password-reset/",
+        PasswordResetView.as_view(
+            template_name="users/password_reset.html",
+            email_template_name="users/password_reset_email.html",  # Шаблон письма
+            success_url="/users/password-reset/done/",
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/done/",
+        PasswordResetDoneView.as_view(template_name="users/password_reset_done.html"),
+        name="password_reset_done",
+    ),
+    path(
+        "reset/<uidb64>/<token>/",
+        PasswordResetConfirmView.as_view(
+            template_name="users/password_reset_confirm.html",
+            success_url="/users/reset/done/",
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "reset/done/",
+        PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html"),
+        name="password_reset_complete",
+    ),
+
 ]
 
 if settings.DEBUG:

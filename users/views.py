@@ -1,11 +1,16 @@
 import secrets
 
+
 from django.contrib import messages
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.contrib.auth.views import LoginView
+
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.generic import CreateView, UpdateView
+
+from django.views.generic import CreateView, UpdateView, FormView
 
 from config.settings import EMAIL_HOST_USER
 from .forms import CustomUserCreationForm, UserProfileForm
@@ -88,3 +93,4 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return self.request.user  # редактируем только текущего пользователя
+
