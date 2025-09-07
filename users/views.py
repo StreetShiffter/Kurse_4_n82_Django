@@ -13,6 +13,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import CreateView, UpdateView, FormView
 
 from config.settings import EMAIL_HOST_USER
+from mailservices.models import MailAttempt
 from .forms import CustomUserCreationForm, UserProfileForm
 from django.views import View
 from django.urls import reverse_lazy, reverse
@@ -80,8 +81,18 @@ class CustomLoginView(LoginView):
 class UserProfileView(View):
     '''Вьюшка кабинета пользователя'''
 
+
     def get(self, request):
-        return render(request, 'users/profile.html')
+        user = request.user
+        attempts = MailAttempt.objects.filter(mailing__owner=user)
+
+        context = {
+            'user_profile': user,
+            'total_attempts': attempts.count(),
+            'successful_attempts': attempts.filter(status='success').count(),
+            'failed_attempts': attempts.filter(status='failed').count(),
+        }
+        return render(request, 'users/profile.html', context)
 
 
 class UserProfileEditView(LoginRequiredMixin, UpdateView):
