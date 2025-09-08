@@ -25,4 +25,5 @@ urlpatterns = [
     path("sending/<int:pk>/edit/", views.SendingUpdateView.as_view(), name="sending_edit"),
     path('attempts/', views.AttemptListView.as_view(), name='attempt_list'),
     path('<int:pk>/send/', views.SendingNowView.as_view(), name='send_mailing_now'),
+    path('users/', views.SendingNowView.as_view(), name='send_mailing_now'),
 ]
