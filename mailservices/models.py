@@ -31,6 +31,11 @@ class Client(models.Model):
     class Meta:
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
+        # Права для менеджеров
+        permissions = [
+            ("can_view_all_clients", "Может просматривать всех получателей"),
+        ]
+
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
@@ -51,6 +56,11 @@ class Message(models.Model):
     class Meta:
         verbose_name = "Сообщение"
         verbose_name_plural = "Сообщения"
+        # Права для менеджеров
+        permissions = [
+            ("can_view_all_messages", "Может просматривать все сообщения"),
+        ]
+
 
     def __str__(self):
         return self.title
@@ -92,6 +102,10 @@ class Sending(models.Model):
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+        permissions = [
+            ("can_view_all_sendings", "Может просматривать все рассылки"),
+        ]
+
 
     def clean(self):
         super().clean()
