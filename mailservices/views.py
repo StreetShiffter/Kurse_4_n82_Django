@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.core.cache import cache
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 
@@ -80,6 +82,7 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
+
 class ClientListView(LoginRequiredMixin, ListView):
     """Просмотр всех записей клиентов"""
     model = Client
@@ -119,8 +122,7 @@ class MessageListView(LoginRequiredMixin, ListView):
     template_name = "mailservices/message_list.html"
     context_object_name = "messages"
 
-    # def get_queryset(self):
-    #     #     return Message.objects.filter(owner=self.request.user)
+
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Message.objects.all()  # Админ видит всех
@@ -150,6 +152,7 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
 ################################################################################################
 
 # Sending CRUD
+
 class SendingListView(LoginRequiredMixin, ListView):
     """Просмотр списка рассылок"""
     model = Sending
@@ -342,7 +345,7 @@ class UserSendingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 @login_required
 def toggle_user_block_sending(request, pk):
-    """Блокировка пользователя админом или модератором"""
+    """Блокировка рассылки пользователя админом или модератором"""
     sending = get_object_or_404(Sending, pk=pk)
 
     # ✅ Переключаем статус

@@ -147,21 +147,29 @@ class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 def toggle_user_active(request, pk):
     """Блокировка пользователя админом или модератором"""
 
+    print("=== toggle_user_active ===")
+    print("User:", request.user.username, "is_superuser:", request.user.is_superuser)
+    print("Target user pk:", pk)
+
     if not request.user.is_superuser:
+        messages.error(request, "Доступ запрещён: не суперпользователь")
+        print("Доступ запрещён")
         return redirect('users:user_list')
 
     user = get_object_or_404(User, pk=pk)
+    print("Target user:", user.username, "is_active:", user.is_active)
 
     # 🔒 Защита от самоблокирования
     if user.pk == request.user.pk:
         messages.error(request, "Нельзя заблокировать самого себя!")
+        print("Попытка самоблокировки")
         return redirect('users:user_list')
 
-    # ✅ Переключаем статус
+    old_status = user.is_active
     user.is_active = not user.is_active
     user.save()
+    print(f"Статус изменён: {old_status} → {user.is_active}")
 
-    # 📢 Оповещение — что изменилось
     if user.is_active:
         messages.success(request, f"Пользователь {user.username} разблокирован.")
     else:
