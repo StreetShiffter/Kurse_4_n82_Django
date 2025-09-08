@@ -30,6 +30,7 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='user_list'),
     path('users/toggle/<int:pk>/', views.toggle_user_active, name='toggle_user_active'),
 
+
     # Логика сброса пароля
 
     path(

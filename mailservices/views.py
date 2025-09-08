@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -87,9 +87,11 @@ class ClientListView(LoginRequiredMixin, ListView):
     context_object_name = "clients"
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
+        user = self.request.user
+
+        if user.is_superuser or user.has_perm('mailservices.can_view_all_clients'):
             return Client.objects.all()  # Админ видит всех
-        return Client.objects.filter(owner=self.request.user)  # Обычный пользователь — только свои
+        return Client.objects.filter(owner=user)  # Обычный пользователь — только свои
 
 class ClientDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление записи клиента"""
@@ -268,4 +270,72 @@ class AttemptListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'История отправки писем'
+        return context
+#############################################################################################
+"""Администрирование - для просмотра информации пользователей"""
+class UserClientListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Client
+    template_name = 'mailservices/client_list.html'
+    context_object_name = 'clients'  # теперь в шаблоне: {{ clients }}
+
+    def test_func(self):
+        """Разрешаем доступ, если есть право просмотра всех клиентов"""
+        return self.request.user.has_perm('mailservices.can_view_all_clients')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Client.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        return context
+
+
+class UserMessageListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Message
+    template_name = 'mailservices/message_list.html'
+    context_object_name = 'messages'
+
+    def test_func(self):
+        return self.request.user.has_perm('mailservices.can_view_all_messages')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Message.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        return context
+
+
+class UserSendingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Sending
+    template_name = 'mailservices/sending_list.html'
+    context_object_name = 'sendings'
+
+    def test_func(self):
+        return self.request.user.has_perm('mailservices.can_view_all_sendings')
+
+    def get_queryset(self):
+        # Получаем ID пользователя из URL
+        user_id = self.kwargs['user_id']
+        # Находим владельца
+        self.owner = get_object_or_404(User, pk=user_id)
+        # Возвращаем клиентов этого владельца
+        return Sending.objects.filter(owner=self.owner)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['owner'] = self.owner  # теперь self.owner определён
+        context['now'] = timezone.now()# Для корректного отображения кнопки "Отпаравить" в шаблоне по времени
         return context

@@ -25,4 +25,9 @@ urlpatterns = [
     path("sending/<int:pk>/edit/", views.SendingUpdateView.as_view(), name="sending_edit"),
     path('attempts/', views.AttemptListView.as_view(), name='attempt_list'),
     path('<int:pk>/send/', views.SendingNowView.as_view(), name='send_mailing_now'),
+    #####################################################################################
+    #Администрирование
+    path('users/<int:user_id>/clients/', views.UserClientListView.as_view(), name='user_client_list'),
+    path('users/<int:user_id>/messages/', views.UserMessageListView.as_view(), name='user_message_list'),
+    path('users/<int:user_id>/sendings/', views.UserSendingListView.as_view(), name='user_sending_list'),
 ]
