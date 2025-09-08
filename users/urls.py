@@ -2,11 +2,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from users.apps import UsersConfig
+from . import views
 from .views import (CustomLoginView,
                     UserRegisterView,
                     UserProfileView,
                     UserProfileEditView,
-                    email_verification)
+                    email_verification, UserListView)
 
 from django.contrib.auth.views import (
     LogoutView,
@@ -26,6 +27,9 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name="login"),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('email-confirm/<str:token>/', email_verification, name="email-confirm"),
+    path('users/', UserListView.as_view(), name='user_list'),
+    path('users/toggle/<int:pk>/', views.toggle_user_active, name='toggle_user_active'),
+
     # Логика сброса пароля
 
     path(

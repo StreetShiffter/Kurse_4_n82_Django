@@ -21,7 +21,7 @@
                 </li>
                 {% if user.is_authenticated and perms.mailservices.can_view_all_messages and perms.mailservices.can_view_all_sendings and perms.mailservices.can_view_all_clients %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mailservices:user_list' %}">Пользователи</a>
+                    <a class="nav-link" href="{% url 'users:user_list' %}">Пользователи</a>
                 </li>
                 {% endif %}
             </ul>

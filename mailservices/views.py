@@ -269,19 +269,3 @@ class AttemptListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'История отправки писем'
         return context
-
-################################################################################
-#Администрирование
-
-class UserListView(LoginRequiredMixin, ListView):
-    """Просмотр всех пользователей, сообщений, клиентов и рассылок"""
-    model = User
-    template_name = "mailservices/user_list.html"
-    context_object_name = "users"
-
-    def get_queryset(self):
-        if self.request.user.is_superuser:
-            return User.objects.all(), Message.objects.all(), Sending.objects.all(), Client.objects.all()# Админ видит всех
-
-
-
