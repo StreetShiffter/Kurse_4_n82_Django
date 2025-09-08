@@ -69,6 +69,9 @@
                             <span class="text-muted btn btn-sm btn-secondary disabled" style="pointer-events: none;">Нет прав</span>
                             <span class="text-muted btn btn-sm btn-secondary disabled" style="pointer-events: none;">Нет прав</span>
                         {% endif %}
+                        {% if perms.mailservices %}
+                            <a href="{% url 'mailservices:toggle_user_block_sending' sending.pk %}" class="btn btn-sm btn-danger">Заблокировать рассылку</a>
+                        {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

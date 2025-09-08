@@ -339,3 +339,14 @@ class UserSendingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context['owner'] = self.owner  # теперь self.owner определён
         context['now'] = timezone.now()# Для корректного отображения кнопки "Отпаравить" в шаблоне по времени
         return context
+
+@login_required
+def toggle_user_block_sending(request, pk):
+    """Блокировка пользователя админом или модератором"""
+    sending = get_object_or_404(Sending, pk=pk)
+
+    # ✅ Переключаем статус
+    sending.status = "completed"
+    sending.save()
+
+    return redirect('mailservices:sending_list')

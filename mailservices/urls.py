@@ -30,4 +30,5 @@ urlpatterns = [
     path('users/<int:user_id>/clients/', views.UserClientListView.as_view(), name='user_client_list'),
     path('users/<int:user_id>/messages/', views.UserMessageListView.as_view(), name='user_message_list'),
     path('users/<int:user_id>/sendings/', views.UserSendingListView.as_view(), name='user_sending_list'),
+    path('users/toggle-sending/<int:pk>/', views.toggle_user_block_sending, name='toggle_user_block_sending'),
 ]
