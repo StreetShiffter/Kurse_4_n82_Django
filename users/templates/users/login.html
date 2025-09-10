@@ -1,0 +1,35 @@
+{% extends "mailservices/base.html" %}
+{% block title %}Главная{% endblock %}
+{%  include 'mailservices/includes/inc_menu.html' %}
+
+{% block content %}
+
+  <h2>Вход</h2>
+
+  <!-- Отображение сообщений -->
+<div class="container mt-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+    <!-- Показываем "Вспомнить пароль?" только после ошибки пароля -->
+    {% if form.errors %}
+      {% if 'password' in form.errors or form.non_field_errors %}
+        <div class="mt-3">
+          <a href="{% url 'users:password_reset' %}">Забыли пароль?</a>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+{% endblock %}

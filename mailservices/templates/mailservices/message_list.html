@@ -1,0 +1,54 @@
+{% extends "mailservices/base.html" %}
+
+{% block title %}Список gbctv{% endblock %}
+
+{% block content %}
+    <h2>Список писем для рассылки пользователя {{ owner.email }}</h2>
+
+    {% if object_list %}
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>Заголовок письма</th>
+                <th>Тема письма</th>
+                {% if perms.mailservices.can_view_all_messages %}
+                <th>Владелец</th>
+                {% endif %}
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for message in object_list %}
+                <tr>
+                    <td>{{ message.title }}</td>
+                    <td>{{ message.body|default:"—" }}</td>
+                    {% if perms.mailservices.can_view_all_messages %}
+                        <th>{{ message.owner }}</th>
+                        {% endif %}
+                    <td>
+                         <!-- Просмотр — всегда можно -->
+                        <a href="{% url 'mailservices:message_detail' message.pk %}" class="btn btn-sm btn-info">Просмотр</a>
+
+                        <!-- Редактирование и удаление — только если владелец -->
+                        {% if client.owner == request.user %}
+                            <a href="{% url 'mailservices:message_edit' message.pk %}" class="btn btn-sm btn-warning">Изменить</a>
+                            <a href="{% url 'mailservices:message_delete' message.pk %}" class="btn btn-sm btn-danger">Удалить</a>
+                        {% else %}
+                            <!-- Не владелец — только просмотр -->
+                            <span class="text-muted btn btn-sm btn-secondary disabled" style="pointer-events: none;">Нет прав</span>
+                            <span class="text-muted btn btn-sm btn-secondary disabled" style="pointer-events: none;">Нет прав</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">Нет писем.</div>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{% url 'mailservices:message_create' %}" class="btn btn-success">Создать новое письмо</a>
+    </div>
+
+{% endblock %}
