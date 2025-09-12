@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import EmailValidator, MaxLengthValidator
 from django.db import models
 
+
 # 1. Сначала — кастомный менеджер
 class UserManager(BaseUserManager):
     '''Кастомное правило создание пользователя и суперпользователя'''

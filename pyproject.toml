@@ -3,7 +3,7 @@ name = "kurse-4-django"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "StreetShiffter", email = "agwzdushaz@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -19,7 +19,15 @@ dependencies = [
     "ipython (>=9.5.0,<10.0.0)"
 ]
 
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+# ✅ Добавьте ЭТУ секцию — именно здесь должен быть package-mode
+[tool.poetry]
+name = "kurse-4-django"
+version = "0.1.0"
+description = ""
+authors = ["StreetShiffter <agwzdushaz@gmail.com>"]
+readme = "README.md"
+package-mode = false  # ✅ Вот где это должно быть!
