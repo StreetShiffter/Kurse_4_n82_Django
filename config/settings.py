@@ -138,7 +138,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Создаём папку для логов
 LOGS_DIR = BASE_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(exist_ok=True)# нет папки - создаст
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
