@@ -134,6 +134,11 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Создаём папку для логов
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -150,7 +155,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': '/var/log/django/mailservices.log',  # или os.path.join(BASE_DIR, 'logs', 'mailservices.log')
+            'filename': str(LOGS_DIR / 'mailservices.log'),
             'formatter': 'verbose',
     },
     },
