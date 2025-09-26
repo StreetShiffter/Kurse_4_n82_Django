@@ -148,14 +148,19 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/mailservices.log',  # или os.path.join(BASE_DIR, 'logs', 'mailservices.log')
+            'formatter': 'verbose',
+    },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'INFO',
     },
     'loggers': {
         'mailservices': {  # ← имя вашего приложения
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
